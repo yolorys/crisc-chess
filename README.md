@@ -94,6 +94,7 @@ risck-chess/
 ├── generate_visuals.py            # Matplotlib/Seaborn chart generation
 ├── download_data.sh               # Automated Parquet download script
 ├── shell.nix                      # Reproducible Nix environment
+├── requirements.txt               # A list of external libraries
 └── LICENSE                        # MIT License
 ```
 
