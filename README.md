@@ -105,15 +105,26 @@ risck-chess/
 ### Path A: Quick Evaluation (Recommended)
 This path allows you to run a quick version of the pipeline using a 10,000-row toy dataset (from lichess_2026-04) without downloading the full 45GB data.
 
-1. **Install Requirements**:
+1. **Create and activate a virtual environment**:
+   ```bash
+   python -m venv .venv
+   ```
+   ```bash
+   # Linux / macOS
+   source .venv/bin/activate
+
+   # Windows (PowerShell)
+   .venv\Scripts\activate
+   ```
+2. **Install Requirements**:
    ```bash
    pip install -r requirements.txt
    ```
-2. **Download DuckDB Binary**:
+3. **Download DuckDB Binary**:
    Download the DuckDB CLI executable (v1.5.3 or compatible) from the official website (https://duckdb.org/install/?platform=windows&environment=cli) and place the `duckdb` binary directly in the root directory.
-3. **Configure for Path A**:
+4. **Configure for Path A**:
    Modify the *DATA_DIR* variable in the orchestration scripts (`sensitivity_analysis.py` and `results_scaler_T5_E400.py`) to point to `./data_sample` instead of `./data`. In `results_scaler_T5_E400.py`, remove "2026-02" and "2026-03" from the array *months*.
-4. **Run Pipeline**:
+5. **Run Pipeline**:
    Execute:
    ```bash
    python sensitivity_analysis.py

@@ -20,6 +20,7 @@
 .env
 .DS_Store
 .vscode/
+.venv/
 
 # ===========================
 # Private Notes (not for public)
