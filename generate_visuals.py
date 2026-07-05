@@ -13,6 +13,7 @@ for folder in ["./results", "./visuals"]:
 # ============================================================
 # Configuration
 # ============================================================
+T_O_THRESHOLD = 5  # seconds — opponent time pressure threshold
 sns.set_theme(style="whitegrid", font_scale=1.2)
 plt.rcParams.update({
     'font.family': 'sans-serif',
@@ -31,13 +32,21 @@ combined_wr = float(combined['Win_Rate'].strip('%'))
 combined_ro = float(combined['Reaction_Time'])
 combined_n = int(combined['N'])
 
+# Load the control group results
+df_ctrl = pd.read_csv('./results/control_group_results_T5.csv')
+ctrl_combined = df_ctrl[df_ctrl['Month'] == 'ALL_MONTHS_COMBINED'].iloc[0]
+ctrl_ro = float(ctrl_combined['Control_Reaction_Time'])
+ctrl_n_valid = int(ctrl_combined['Valid_Games'])
+ctrl_n_sampled = int(ctrl_combined['Total_Sampled'])
+ctrl_wr = float(ctrl_combined['Win_Rate'].strip('%')) if 'Win_Rate' in ctrl_combined and pd.notna(ctrl_combined['Win_Rate']) else None
+
 # ============================================================
 # FIGURE 1: RISCK Win Rate vs Baseline
 # ============================================================
 fig1, ax1 = plt.subplots(figsize=(7, 6))
 
 categories = ['Control Check\n(Mathematically Sound Move)', 'RISCK\n']
-values = [82.52, combined_wr]
+values = [ctrl_wr, combined_wr]
 colors = ['#3b82f6', '#dc2626']
 
 bars = ax1.bar(categories, values, width=0.55, color=colors,
@@ -51,7 +60,7 @@ for bar, val in zip(bars, values):
 
 ax1.set_ylabel('Win Rate (%)', fontsize=14, fontweight='bold')
 ax1.set_title(f'Win Rate: Sound Checks vs. RISCK Tactics\n'
-              f'($T_O \\leq 5s$, $N_{{RISCK}} = {combined_n:,}$, $N_{{Control}} = 64,500$)',
+              f'($T_O \\leq {T_O_THRESHOLD}s$, $N_{{RISCK}} = {combined_n:,}$, $N_{{Control}} = {ctrl_n_sampled:,}$)',
               fontsize=14, fontweight='bold', pad=15)
 ax1.set_ylim(0, 100)
 ax1.tick_params(axis='both', labelsize=12)
@@ -70,7 +79,7 @@ print("Saved fig1_winrate.png")
 fig2, ax2 = plt.subplots(figsize=(7, 6))
 
 categories2 = ['Control Check\n(Mathematically Sound Move)', 'RISCK\n']
-values2 = [1.28, combined_ro]
+values2 = [ctrl_ro, combined_ro]
 colors2 = ['#3b82f6', '#dc2626']
 
 bars2 = ax2.bar(categories2, values2, width=0.55, color=colors2,
@@ -83,7 +92,7 @@ for bar, val in zip(bars2, values2):
              fontsize=16, fontweight='bold', color='#1e293b')
 
 # Delta annotation arrow
-delta = 1.28 - combined_ro
+delta = ctrl_ro - combined_ro
 ax2.annotate(f'$\\Delta = -{delta:.2f}s$',
              xy=(1, combined_ro), xytext=(0.5, 1.40),
              fontsize=13, fontweight='bold', color='#dc2626',
@@ -92,7 +101,7 @@ ax2.annotate(f'$\\Delta = -{delta:.2f}s$',
 
 ax2.set_ylabel('Reaction Time (seconds)', fontsize=14, fontweight='bold')
 ax2.set_title(f'Opponent Reaction Time: RISCK vs. Control\n'
-              f'($T_O \\leq 5s$, $N_{{RISCK}} = {combined_n:,}$, $N_{{Control}} = 33,745$)',
+              f'($T_O \\leq {T_O_THRESHOLD}s$, $N_{{RISCK}} = {combined_n:,}$, $N_{{Control}} = {ctrl_n_valid:,}$)',
               fontsize=13, fontweight='bold', pad=15)
 ax2.set_ylim(0, 1.8)
 ax2.tick_params(axis='both', labelsize=12)
