@@ -8,7 +8,7 @@ import csv
 for folder in ["./candidate_riscks", "./true_riscks", "./results", "./risck_sql_filter", "./control_checks", "./control_filter"]:
     os.makedirs(folder, exist_ok=True)
 
-months = ["2026-02", "2026-03", "2026-04"]
+months = ["2026-02", "2026-03", "2026-04"] # Remove "2026-02" and "2026-03" for Path A (Quick Evaluation)
 DATA_DIR = "./data"  # Change to "./data_sample" for Path A (Quick Evaluation)
 
 sql_template = """INSTALL aixchess FROM community;
