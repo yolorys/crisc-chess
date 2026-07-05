@@ -9,6 +9,7 @@ for folder in ["./candidate_riscks", "./true_riscks", "./results", "./risck_sql_
     os.makedirs(folder, exist_ok=True)
 
 months = ["2026-02", "2026-03", "2026-04"]
+DATA_DIR = "./data"  # Change to "./data_sample" for Path A (Quick Evaluation)
 
 sql_template = """INSTALL aixchess FROM community;
 LOAD aixchess;
@@ -23,7 +24,7 @@ COPY (
             clocks_white,
             clocks_black,
             move_details(movedata) AS moves
-        FROM './data/aix_lichess_{MONTH}_low.parquet'
+        FROM '{DATA_DIR}/aix_lichess_{MONTH}_low.parquet'
         WHERE 
             time_increment = 0 
             AND time_initial IN (60, 180)
@@ -67,7 +68,7 @@ for month in months:
     print(f"Processing Month {month}")
     print(f"============================")
     
-    sql_query = sql_template.format(MONTH=month)
+    sql_query = sql_template.format(MONTH=month, DATA_DIR=DATA_DIR)
     with open(f"./risck_sql_filter/risck_sql_filter_{month}.sql", "w") as f:
         f.write(sql_query)
         
@@ -79,7 +80,7 @@ for month in months:
     
     print(f"Running scripts for Win Rate & Reaction Time for {month}...")
     wr_out = subprocess.run([sys.executable, "risck_winrate.py", month], capture_output=True, text=True, check=True).stdout
-    ro_out = subprocess.run([sys.executable, "risck_opponent_reaction.py", month], capture_output=True, text=True, check=True).stdout
+    ro_out = subprocess.run([sys.executable, "risck_opponent_reaction.py", month, DATA_DIR], capture_output=True, text=True, check=True).stdout
     
     # Parse Win Rate output
     wr_match = re.search(r"--- GLOBAL RISCK WIN RATE ---\n([\d.]+)%", wr_out)

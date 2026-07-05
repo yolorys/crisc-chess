@@ -3,10 +3,11 @@ import pandas as pd
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: python risck_opponent_reaction.py <MONTH>")
+    print("Usage: python risck_opponent_reaction.py <MONTH> [data_dir]")
     sys.exit(1)
 
 month = sys.argv[1]
+data_dir = sys.argv[2] if len(sys.argv) >= 3 else "./data"
 
 print("Joining Datasets to Calculate Average Reaction Time (R_O)...")
 
@@ -24,7 +25,7 @@ SELECT
     p.clocks_white, 
     p.clocks_black
 FROM riscks r
-JOIN './data/aix_lichess_{month}_low.parquet' p ON r.lichess_id = p.lichess_id
+JOIN '{data_dir}/aix_lichess_{month}_low.parquet' p ON r.lichess_id = p.lichess_id
 """
 results = con.execute(query).df()
 

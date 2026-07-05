@@ -10,6 +10,7 @@ for folder in ["./candidate_riscks", "./true_riscks", "./results", "./risck_sql_
 
 # Configuration: Target dataset and threshold permutations
 DATA_MONTH = "2026-04"
+DATA_DIR = "./data"  # Change to "./data_sample" for Path A (Quick Evaluation)
 
 permutations = [
     (5, 400),
@@ -32,7 +33,7 @@ COPY (
             clocks_white,
             clocks_black,
             move_details(movedata) AS moves
-        FROM './data/aix_lichess_{MONTH}_low.parquet'
+        FROM '{DATA_DIR}/aix_lichess_{MONTH}_low.parquet'
         WHERE 
             time_increment = 0 
             AND time_initial IN (60, 180)
@@ -72,7 +73,7 @@ for to, de in permutations:
     print(f"Running Permutation T_O={to}, Delta_E={de}")
     print(f"============================")
     
-    sql_query = sql_template.format(T_O=to, DELTA_E=de, MONTH=DATA_MONTH, PERM_ID=perm_id)
+    sql_query = sql_template.format(T_O=to, DELTA_E=de, MONTH=DATA_MONTH, PERM_ID=perm_id, DATA_DIR=DATA_DIR)
     sql_file = f"./risck_sql_filter/risck_sql_filter_{perm_id}.sql"
     with open(sql_file, "w") as f:
         f.write(sql_query)
@@ -85,7 +86,7 @@ for to, de in permutations:
     
     print("Running scripts for Win Rate & Reaction Time...")
     wr_out = subprocess.run([sys.executable, "risck_winrate.py", perm_id], capture_output=True, text=True, check=True).stdout
-    ro_out = subprocess.run([sys.executable, "risck_opponent_reaction.py", perm_id], capture_output=True, text=True, check=True).stdout
+    ro_out = subprocess.run([sys.executable, "risck_opponent_reaction.py", DATA_MONTH, DATA_DIR], capture_output=True, text=True, check=True).stdout
     
     wr_match = re.search(r"--- GLOBAL RISCK WIN RATE ---\n([\d.]+)%", wr_out)
     win_rate = wr_match.group(1) if wr_match else "N/A"
