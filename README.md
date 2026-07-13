@@ -1,18 +1,23 @@
-# RISCK: Lichess Time-Scramble Data Analysis Pipeline
+# CRISC: Data Analysis Pipeline for a Time-Scramble Tactic in Online Speed Chess
 
-**[Read the full article and case study on my portfolio](https://yelarys.dev/blog/risck-analysis-pipeline)**
+**[Read the project write-up on my portfolio](https://yelarys.dev/blog/crisc-analysis-pipeline)**
 
 ---
 
 ## Abstract
 
-This project is a computational research pipeline that processes **45+ GB of raw Lichess game data** to isolate and analyze a specific time-scramble tactic in online speed chess: the **RISCK** (Random Inferior Sacrificial Check to King).
+This project is a data pipeline that processes **45+ GB of raw Lichess game data** to isolate and analyze a specific time-scramble tactic in online speed chess: the **CRISC** - Contiguous Random Inferior Sacrificial Check, formerly called RISCK - Random Inferior Sacrificial Check to King.
 
-A RISCK is defined as an intentional, objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under extreme time pressure (≤ 5 seconds). Despite being a mathematically losing move (evaluation drop ≥ 400 centipawns), this research demonstrates that executing a RISCK yields a **76.17% win rate** across **N = 64,121** verified instances spanning three months of Lichess data (February–April 2026).
+A CRISC is defined as an intentional, objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under extreme time pressure (≤ 5 seconds). Despite being a mathematically losing move (evaluation drop ≥ 400 centipawns), this analysis demonstrates that executing a CRISC yields a **76.17% win rate** across **N = 64,121** verified instances spanning three months of Lichess data (February–April 2026).
 
-### Key Findings
+### A visual example of CRISC from my dataset:
+![An example of CRISC from my dataset](./crisc_repo_cover.png)
 
-| Metric | RISCK Group | Control Group |
+In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguous to the opponent's King, which dropped the engine eval by 5.8. White eventually won on time.
+
+### Initial findings from Iteration 1
+
+| Metric | CRISC Group | Control Group |
 |---|:---:|:---:|
 | **Win Rate** | 76.17% | 82.52% |
 | **Reaction Time (R_O)** | 1.24s | 1.28s |
@@ -22,13 +27,13 @@ A RISCK is defined as an intentional, objectively inferior piece sacrifice deliv
 ![Win Rate Comparison](./visuals/fig1_winrate.png)
 ![Reaction Time Comparison](./visuals/fig2_reaction.png)
 
-> Despite sacrificing material worth ≥ 400 centipawns, RISCK executors retain a 76% win rate — only ~6 percentage points below players who deliver *mathematically sound* checks under identical time pressure.
+> Despite sacrificing material worth ≥ 400 centipawns, CRISC executors retain a 76% win rate — only ~6 percentage points below players who deliver *mathematically sound* checks under identical time pressure.
 
 ---
 
 ## Methodology: Two-Step Filter
 
-The pipeline uses a two-step filtering approach to isolate true RISCKs from ~270 million games:
+The pipeline uses a two-step filtering approach to isolate true CRISCs from ~270 million games:
 
 ### Step 1 — SQL Broad Filter (DuckDB + `aixchess` Extension)
 Scans Parquet files to extract all candidate checks meeting:
@@ -62,18 +67,18 @@ Rebuilds each board position and verifies:
 ## Repository Structure
 
 ```
-risck-chess/
+crisc-chess/
 ├── data/                          # Raw Parquet files (not tracked — 45+ GB)
 │
-├── risck_sql_filter/              # RISCK group SQL queries
-│   └── risck_sql_filter_YYYY-MM.sql
+├── crisc_sql_filter/              # CRISC group SQL queries
+│   └── crisc_sql_filter_YYYY-MM.sql
 ├── control_filter/                # Control group SQL queries
 │   └── control_filter_YYYY-MM.sql
 │
-├── candidate_riscks/              # Step 1 output — intermediate CSVs (not tracked)
-│   └── candidate_riscks_YYYY-MM.csv
-├── true_riscks/                   # Step 2 output — verified RISCK datasets
-│   └── true_riscks_YYYY-MM.csv
+├── candidate_criscs/              # Step 1 output — intermediate CSVs (not tracked)
+│   └── candidate_criscs_YYYY-MM.csv
+├── true_criscs/                   # Step 2 output — verified CRISC datasets
+│   └── true_criscs_YYYY-MM.csv
 ├── control_checks/                # Control group datasets
 │   └── control_checks_YYYY-MM.csv
 ├── results/                       # Final aggregated statistics
@@ -86,9 +91,9 @@ risck-chess/
 │
 ├── sensitivity_analysis.py        # Threshold permutation orchestrator
 ├── results_scaler_T5_E400.py      # Multi-month scaling pipeline
-├── risck_geometric_filter.py      # Geometric adjacency filter (python-chess)
-├── risck_winrate.py               # Win rate calculator
-├── risck_opponent_reaction.py     # Opponent reaction time (R_O) calculator
+├── crisc_geometric_filter.py      # Geometric adjacency filter (python-chess)
+├── crisc_winrate.py               # Win rate calculator
+├── crisc_opponent_reaction.py     # Opponent reaction time (R_O) calculator
 ├── control_opponent_reaction.py   # Control group extraction & reaction time
 ├── control_winrate.py             # Control group win rate calculator
 ├── generate_visuals.py            # Matplotlib/Seaborn chart generation
