@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
-  name = "risck-analysis-env";
+  name = "crisc-analysis-env";
   
   buildInputs = [
     pkgs.python3
@@ -13,6 +13,7 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    export PS1="\[\e[1;32m\][crisc-analysis-env:\w]\$\[\e[0m\] "
     echo "Environment Ready! Python, Pandas, Chess, DuckDB, Matplotlib, and Seaborn are loaded."
   '';
 }

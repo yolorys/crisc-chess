@@ -22,7 +22,7 @@ COPY (
             lichess_id,
             ply,
             result,
-            CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS risck_player
+            CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS crisc_player
         FROM exploded_games
         WHERE 
             moves[ply].is_check = TRUE

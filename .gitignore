@@ -1,43 +1,32 @@
-# ===========================
 # Heavy Data (45+ GB Parquet files)
-# ===========================
 /data/
 *.parquet
 
-# ===========================
 # DuckDB Binary
-# ===========================
 /duckdb
 
-# ===========================
-# Candidate RISCKs (~100MB intermediate CSVs)
-# ===========================
-/candidate_riscks/
+# Candidate CRISCs (~100MB intermediate CSVs)
+/candidate_criscs/
 
-# ===========================
 # Environment & OS
-# ===========================
 .env
 .DS_Store
 .vscode/
 .venv/
 
-# ===========================
-# Private Notes (not for public)
-# ===========================
+# Private
 PROJECT_CONTEXT.md
 TODO.md
+crisc_repo_cover.png
 
-# ===========================
 # ALLOW: Final lightweight datasets (safe to publish)
-# ===========================
 !/data_sample/
 !/data_sample/**
 !/results/
 !/results/**
-!/true_riscks/
-!/true_riscks/**
+!/true_criscs/
+!/true_criscs/**
 !/control_checks/
 !/control_checks/**
-!/risck_sql_filter/
-!/risck_sql_filter/**
+!/crisc_sql_filter/
+!/crisc_sql_filter/**

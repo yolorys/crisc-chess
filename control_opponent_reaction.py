@@ -36,7 +36,7 @@ COPY (
             lichess_id,
             ply,
             result,
-            CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS risck_player
+            CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS crisc_player
         FROM exploded_games
         WHERE 
             moves[ply].is_check = TRUE
@@ -87,7 +87,7 @@ for month in months:
     SELECT 
         c.lichess_id, 
         c.ply, 
-        c.risck_player, 
+        c.crisc_player, 
         p.clocks_white, 
         p.clocks_black
     FROM controls c
@@ -101,7 +101,7 @@ for month in months:
 
     for _, row in results.iterrows():
         ply = int(row['ply'])
-        player = row['risck_player']
+        player = row['crisc_player']
         clocks_white = row['clocks_white']
         clocks_black = row['clocks_black']
 

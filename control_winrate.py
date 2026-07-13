@@ -3,8 +3,8 @@ import os
 
 def compute_win_stats(dataframe):
     total = len(dataframe)
-    white_wins = len(dataframe[(dataframe['risck_player'] == 'White') & (dataframe['result'] == '1-0')])
-    black_wins = len(dataframe[(dataframe['risck_player'] == 'Black') & (dataframe['result'] == '0-1')])
+    white_wins = len(dataframe[(dataframe['crisc_player'] == 'White') & (dataframe['result'] == '1-0')])
+    black_wins = len(dataframe[(dataframe['crisc_player'] == 'Black') & (dataframe['result'] == '0-1')])
     total_wins = white_wins + black_wins
     win_rate = (total_wins / total) * 100 if total > 0 else 0
     return white_wins, black_wins, total_wins, win_rate

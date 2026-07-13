@@ -3,19 +3,19 @@ import chess
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: python risck_geometric_filter.py <MONTH>")
+    print("Usage: python crisc_geometric_filter.py <MONTH>")
     sys.exit(1)
 
 month = sys.argv[1]
 
-print("Starting Step 2: Geometric RISCK Filter...")
+print("Starting Step 2: Geometric CRISC Filter...")
 
 # 1. Load the Step 1 (DuckDB) Data
-df = pd.read_csv(f'./candidate_riscks/candidate_riscks_{month}.csv')
+df = pd.read_csv(f'./candidate_criscs/candidate_criscs_{month}.csv')
 total_candidates = len(df)
-print(f"Loaded {total_candidates} candidate RISCKs. Processing...")
+print(f"Loaded {total_candidates} candidate CRISCs. Processing...")
 
-true_riscks = []
+true_criscs = []
 error_count = 0
 
 # 2. Iterate over the FULL dataset
@@ -23,7 +23,7 @@ for index, row in df.iterrows():
     
     # Print a progress update every 10,000 rows
     if index > 0 and index % 10000 == 0:
-        print(f"Processed {index}/{total_candidates} rows... Found {len(true_riscks)} RISCKs so far.")
+        print(f"Processed {index}/{total_candidates} rows... Found {len(true_criscs)} CRISCs so far.")
         
     game_id = row['lichess_id']
     target_ply = int(row['ply'])
@@ -46,20 +46,20 @@ for index, row in df.iterrows():
         is_major_piece = piece_type != chess.PAWN
         
         if is_adjacent and is_capturable and is_major_piece:
-            true_riscks.append(row)
+            true_criscs.append(row)
             
     except ValueError as e:
         error_count += 1
         continue
 
 # 3. Save the final refined dataset
-final_df = pd.DataFrame(true_riscks)
+final_df = pd.DataFrame(true_criscs)
 if not final_df.empty:
     final_df = final_df.drop(columns=['move_list'])
-final_df.to_csv(f'./true_riscks/true_riscks_{month}.csv', index=False)
+final_df.to_csv(f'./true_criscs/true_criscs_{month}.csv', index=False)
 
-print(f"\nStep 2 (Geometric RISCK Filter) Complete!")
-print(f"Found {len(true_riscks)} True RISCKs out of {total_candidates} total candidates.")
+print(f"\nStep 2 (Geometric CRISC Filter) Complete!")
+print(f"Found {len(true_criscs)} True CRISCs out of {total_candidates} total candidates.")
 if error_count > 0:
     print(f"Note: {error_count} games were skipped due to PGN/UCI parsing errors.")
-print(f"Saved to './true_riscks/true_riscks_{month}.csv'.")
+print(f"Saved to './true_criscs/true_criscs_{month}.csv'.")

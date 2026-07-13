@@ -41,11 +41,11 @@ ctrl_n_sampled = int(ctrl_combined['Total_Sampled'])
 ctrl_wr = float(ctrl_combined['Win_Rate'].strip('%')) if 'Win_Rate' in ctrl_combined and pd.notna(ctrl_combined['Win_Rate']) else None
 
 # ============================================================
-# FIGURE 1: RISCK Win Rate vs Baseline
+# FIGURE 1: CRISC Win Rate vs Baseline
 # ============================================================
 fig1, ax1 = plt.subplots(figsize=(7, 6))
 
-categories = ['Control Check\n(Mathematically Sound Move)', 'RISCK\n']
+categories = ['Control Check\n(Mathematically Sound Move)', 'CRISC\n']
 values = [ctrl_wr, combined_wr]
 colors = ['#3b82f6', '#dc2626']
 
@@ -59,8 +59,8 @@ for bar, val in zip(bars, values):
              fontsize=16, fontweight='bold', color='#1e293b')
 
 ax1.set_ylabel('Win Rate (%)', fontsize=14, fontweight='bold')
-ax1.set_title(f'Win Rate: Sound Checks vs. RISCK Tactics\n'
-              f'($T_O \\leq {T_O_THRESHOLD}s$, $N_{{RISCK}} = {combined_n:,}$, $N_{{Control}} = {ctrl_n_sampled:,}$)',
+ax1.set_title(f'Win Rate: Sound Checks vs. CRISC\n'
+              f'($T_O \\leq {T_O_THRESHOLD}s$, $N_{{CRISC}} = {combined_n:,}$, $N_{{Control}} = {ctrl_n_sampled:,}$)',
               fontsize=14, fontweight='bold', pad=15)
 ax1.set_ylim(0, 100)
 ax1.tick_params(axis='both', labelsize=12)
@@ -74,11 +74,11 @@ plt.close(fig1)
 print("Saved fig1_winrate.png")
 
 # ============================================================
-# FIGURE 2: RISCK vs Control Reaction Time
+# FIGURE 2: CRISC vs Control Reaction Time
 # ============================================================
 fig2, ax2 = plt.subplots(figsize=(7, 6))
 
-categories2 = ['Control Check\n(Mathematically Sound Move)', 'RISCK\n']
+categories2 = ['Control Check\n(Mathematically Sound Move)', 'CRISC\n']
 values2 = [ctrl_ro, combined_ro]
 colors2 = ['#3b82f6', '#dc2626']
 
@@ -100,8 +100,8 @@ ax2.annotate(f'$\\Delta = -{delta:.2f}s$',
              ha='center')
 
 ax2.set_ylabel('Reaction Time (seconds)', fontsize=14, fontweight='bold')
-ax2.set_title(f'Opponent Reaction Time: RISCK vs. Control\n'
-              f'($T_O \\leq {T_O_THRESHOLD}s$, $N_{{RISCK}} = {combined_n:,}$, $N_{{Control}} = {ctrl_n_valid:,}$)',
+ax2.set_title(f'Opponent Reaction Time: CRISC vs. Control\n'
+              f'($T_O \\leq {T_O_THRESHOLD}s$, $N_{{CRISC}} = {combined_n:,}$, $N_{{Control}} = {ctrl_n_valid:,}$)',
               fontsize=13, fontweight='bold', pad=15)
 ax2.set_ylim(0, 1.8)
 ax2.tick_params(axis='both', labelsize=12)
