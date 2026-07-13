@@ -11,7 +11,7 @@ COPY (
             clocks_white,
             clocks_black,
             move_details(movedata) AS moves
-        FROM './data/aix_lichess_2026-03_low.parquet'
+        FROM './data/aix_lichess_2026-04_low.parquet'
         WHERE 
             time_increment = 0 
             AND time_initial IN (60, 180)
@@ -38,4 +38,4 @@ COPY (
                 ELSE (eval_to_centipawns(evals[ply]) - eval_to_centipawns(evals[ply - 1])) * -1
             END
         ) <= -400
-) TO './candidate_criscs/candidate_criscs_2026-03.csv' (HEADER, DELIMITER ',');
+) TO './candidate_criscs/candidate_criscs_T5_E400.csv' (HEADER, DELIMITER ',');

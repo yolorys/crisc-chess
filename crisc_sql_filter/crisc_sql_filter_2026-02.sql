@@ -11,7 +11,7 @@ COPY (
             clocks_white,
             clocks_black,
             move_details(movedata) AS moves
-        FROM 'aix_lichess_2026-02_low.parquet'
+        FROM './data/aix_lichess_2026-02_low.parquet'
         WHERE 
             time_increment = 0 
             AND time_initial IN (60, 180)
@@ -21,7 +21,7 @@ COPY (
         lichess_id,
         ply,
         result,
-        CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS risck_player,
+        CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS crisc_player,
         [m."from" || m."to" || m.promotion FOR m IN moves] AS move_list
     FROM exploded_games
     WHERE 
@@ -38,4 +38,4 @@ COPY (
                 ELSE (eval_to_centipawns(evals[ply]) - eval_to_centipawns(evals[ply - 1])) * -1
             END
         ) <= -400
-) TO 'candidate_riscks_2026-02.csv' (HEADER, DELIMITER ',');
+) TO './candidate_criscs/candidate_criscs_2026-02.csv' (HEADER, DELIMITER ',');
