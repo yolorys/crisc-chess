@@ -5,7 +5,7 @@ import re
 import csv
 
 # Create required directory structure
-for folder in ["./candidate_riscks", "./true_riscks", "./results", "./risck_sql_filter", "./control_checks", "./control_filter"]:
+for folder in ["./candidate_criscs", "./true_criscs", "./results", "./crisc_sql_filter", "./control_checks", "./control_filter"]:
     os.makedirs(folder, exist_ok=True)
 
 months = ["2026-02", "2026-03", "2026-04"] # Remove "2026-02" and "2026-03" for Path A (Quick Evaluation)
@@ -34,7 +34,7 @@ COPY (
         lichess_id,
         ply,
         result,
-        CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS risck_player,
+        CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS crisc_player,
         [m."from" || m."to" || m.promotion FOR m IN moves] AS move_list
     FROM exploded_games
     WHERE 
@@ -51,7 +51,7 @@ COPY (
                 ELSE (eval_to_centipawns(evals[ply]) - eval_to_centipawns(evals[ply - 1])) * -1
             END
         ) <= -400
-) TO './candidate_riscks/candidate_riscks_{MONTH}.csv' (HEADER, DELIMITER ',');
+) TO './candidate_criscs/candidate_criscs_{MONTH}.csv' (HEADER, DELIMITER ',');
 """
 
 total_n = 0
@@ -69,27 +69,27 @@ for month in months:
     print(f"============================")
     
     sql_query = sql_template.format(MONTH=month, DATA_DIR=DATA_DIR)
-    with open(f"./risck_sql_filter/risck_sql_filter_{month}.sql", "w") as f:
+    with open(f"./crisc_sql_filter/crisc_sql_filter_{month}.sql", "w") as f:
         f.write(sql_query)
         
     print(f"Running Step 1 (DuckDB SQL broad filter) for {month}...")
-    subprocess.run(["./duckdb", "-unsigned", "-c", f".read ./risck_sql_filter/risck_sql_filter_{month}.sql"], check=True)
+    subprocess.run(["./duckdb", "-unsigned", "-c", f".read ./crisc_sql_filter/crisc_sql_filter_{month}.sql"], check=True)
     
-    print(f"Running Step 2 (risck_geometric_filter.py) for {month}...")
-    subprocess.run([sys.executable, "risck_geometric_filter.py", month], check=True)
+    print(f"Running Step 2 (crisc_geometric_filter.py) for {month}...")
+    subprocess.run([sys.executable, "crisc_geometric_filter.py", month], check=True)
     
     print(f"Running scripts for Win Rate & Reaction Time for {month}...")
-    wr_out = subprocess.run([sys.executable, "risck_winrate.py", month], capture_output=True, text=True, check=True).stdout
-    ro_out = subprocess.run([sys.executable, "risck_opponent_reaction.py", month, DATA_DIR], capture_output=True, text=True, check=True).stdout
+    wr_out = subprocess.run([sys.executable, "crisc_winrate.py", month], capture_output=True, text=True, check=True).stdout
+    ro_out = subprocess.run([sys.executable, "crisc_opponent_reaction.py", month, month, DATA_DIR], capture_output=True, text=True, check=True).stdout
     
     # Parse Win Rate output
-    wr_match = re.search(r"--- GLOBAL RISCK WIN RATE ---\n([\d.]+)%", wr_out)
+    wr_match = re.search(r"--- GLOBAL CRISC WIN RATE ---\n([\d.]+)%", wr_out)
     month_wr = float(wr_match.group(1)) if wr_match else 0.0
     
-    wins_match = re.search(r"Total games WON after executing a RISCK: (\d+)", wr_out)
+    wins_match = re.search(r"Total games WON after executing a CRISC: (\d+)", wr_out)
     month_wins = int(wins_match.group(1)) if wins_match else 0
     
-    n_match = re.search(r"Total True RISCKs analyzed: (\d+)", wr_out)
+    n_match = re.search(r"Total True CRISCs analyzed: (\d+)", wr_out)
     month_n = int(n_match.group(1)) if n_match else 0
     
     # Parse Reaction Time output

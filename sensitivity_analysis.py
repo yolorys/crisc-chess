@@ -5,7 +5,7 @@ import re
 import csv
 
 # Create required directory structure
-for folder in ["./candidate_riscks", "./true_riscks", "./results", "./risck_sql_filter", "./control_checks", "./control_filter"]:
+for folder in ["./candidate_criscs", "./true_criscs", "./results", "./crisc_sql_filter", "./control_checks", "./control_filter"]:
     os.makedirs(folder, exist_ok=True)
 
 # Configuration: Target dataset and threshold permutations
@@ -43,7 +43,7 @@ COPY (
         lichess_id,
         ply,
         result,
-        CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS risck_player,
+        CASE WHEN ply % 2 = 1 THEN 'White' ELSE 'Black' END AS crisc_player,
         [m."from" || m."to" || m.promotion FOR m IN moves] AS move_list
     FROM exploded_games
     WHERE 
@@ -60,7 +60,7 @@ COPY (
                 ELSE (eval_to_centipawns(evals[ply]) - eval_to_centipawns(evals[ply - 1])) * -1
             END
         ) <= -{DELTA_E}
-) TO './candidate_riscks/candidate_riscks_{PERM_ID}.csv' (HEADER, DELIMITER ',');
+) TO './candidate_criscs/candidate_criscs_{PERM_ID}.csv' (HEADER, DELIMITER ',');
 """
 
 with open("./results/sensitivity_analysis_results.csv", "w", newline="") as f:
@@ -74,24 +74,24 @@ for to, de in permutations:
     print(f"============================")
     
     sql_query = sql_template.format(T_O=to, DELTA_E=de, MONTH=DATA_MONTH, PERM_ID=perm_id, DATA_DIR=DATA_DIR)
-    sql_file = f"./risck_sql_filter/risck_sql_filter_{perm_id}.sql"
+    sql_file = f"./crisc_sql_filter/crisc_sql_filter_{perm_id}.sql"
     with open(sql_file, "w") as f:
         f.write(sql_query)
         
     print("Running Step 1 (DuckDB SQL broad filter)...")
     subprocess.run(["./duckdb", "-unsigned", "-c", f".read {sql_file}"], check=True)
     
-    print("Running Step 2 (risck_geometric_filter.py)...")
-    subprocess.run([sys.executable, "risck_geometric_filter.py", perm_id], check=True)
+    print("Running Step 2 (crisc_geometric_filter.py)...")
+    subprocess.run([sys.executable, "crisc_geometric_filter.py", perm_id], check=True)
     
     print("Running scripts for Win Rate & Reaction Time...")
-    wr_out = subprocess.run([sys.executable, "risck_winrate.py", perm_id], capture_output=True, text=True, check=True).stdout
-    ro_out = subprocess.run([sys.executable, "risck_opponent_reaction.py", DATA_MONTH, DATA_DIR], capture_output=True, text=True, check=True).stdout
+    wr_out = subprocess.run([sys.executable, "crisc_winrate.py", perm_id], capture_output=True, text=True, check=True).stdout
+    ro_out = subprocess.run([sys.executable, "crisc_opponent_reaction.py", perm_id, DATA_MONTH, DATA_DIR], capture_output=True, text=True, check=True).stdout
     
-    wr_match = re.search(r"--- GLOBAL RISCK WIN RATE ---\n([\d.]+)%", wr_out)
+    wr_match = re.search(r"--- GLOBAL CRISC WIN RATE ---\n([\d.]+)%", wr_out)
     win_rate = wr_match.group(1) if wr_match else "N/A"
     
-    n_match = re.search(r"Total True RISCKs analyzed: (\d+)", wr_out)
+    n_match = re.search(r"Total True CRISCs analyzed: (\d+)", wr_out)
     n_count = n_match.group(1) if n_match else "N/A"
     
     ro_match = re.search(r"--- AVERAGE REACTION TIME \(R_O\) ---\n([\d.]+) seconds", ro_out)

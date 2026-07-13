@@ -2,29 +2,30 @@ import duckdb
 import pandas as pd
 import sys
 
-if len(sys.argv) < 2:
-    print("Usage: python risck_opponent_reaction.py <MONTH> [data_dir]")
+if len(sys.argv) < 3:
+    print("Usage: python crisc_opponent_reaction.py <FILE_ID> <MONTH> [data_dir]")
     sys.exit(1)
 
-month = sys.argv[1]
-data_dir = sys.argv[2] if len(sys.argv) >= 3 else "./data"
+file_id = sys.argv[1]
+month = sys.argv[2]
+data_dir = sys.argv[3] if len(sys.argv) >= 4 else "./data"
 
 print("Joining Datasets to Calculate Average Reaction Time (R_O)...")
 
 con = duckdb.connect()
 
-# 1. Load your True RISCKs into DuckDB's memory as a temporary table
-con.execute(f"CREATE TABLE riscks AS SELECT * FROM read_csv_auto('./true_riscks/true_riscks_{month}.csv')")
+# 1. Load your True CRISCs into DuckDB's memory as a temporary table
+con.execute(f"CREATE TABLE criscs AS SELECT * FROM read_csv_auto('./true_criscs/true_criscs_{file_id}.csv')")
 
 # 2. Perform a massive JOIN to extract the clocks for ONLY our filtered games
 query = f"""
 SELECT 
     r.lichess_id, 
     r.ply, 
-    r.risck_player, 
+    r.crisc_player, 
     p.clocks_white, 
     p.clocks_black
-FROM riscks r
+FROM criscs r
 JOIN '{data_dir}/aix_lichess_{month}_low.parquet' p ON r.lichess_id = p.lichess_id
 """
 results = con.execute(query).df()
@@ -37,7 +38,7 @@ print("Calculating cognitive delay...")
 # 3. Calculate the time burned by the victim
 for index, row in results.iterrows():
     ply = int(row['ply'])
-    player = row['risck_player']
+    player = row['crisc_player']
     clocks_white = row['clocks_white']
     clocks_black = row['clocks_black']
     
@@ -46,12 +47,12 @@ for index, row in results.iterrows():
         move_index = ply // 2
         
         if player == 'White':
-            # White played the RISCK. Black is the victim reacting.
+            # White played the CRISC. Black is the victim reacting.
             # We measure Black's clock BEFORE they react, and AFTER they react.
             time_before = int(clocks_black[move_index - 1])
             time_after = int(clocks_black[move_index])
         else:
-            # Black played the RISCK. White is the victim reacting.
+            # Black played the CRISC. White is the victim reacting.
             time_before = int(clocks_white[move_index - 1])
             time_after = int(clocks_white[move_index])
             
