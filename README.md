@@ -11,7 +11,7 @@ This project is a data pipeline that processes **45+ GB of raw Lichess game data
 A CRISC is defined as an intentional, objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under extreme time pressure (≤ 5 seconds). Despite being a mathematically losing move (evaluation drop ≥ 400 centipawns), this analysis demonstrates that executing a CRISC yields a **76.17% win rate** across **N = 64,121** verified instances spanning three months of Lichess data (February–April 2026).
 
 ### A visual example of CRISC from my dataset:
-![An example of CRISC from my dataset](./crisc_repo_cover.png)
+![An example of CRISC from my dataset](./visuals/crisc_repo_cover.png)
 
 In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguous to the opponent's King, which dropped the engine eval by 5.8. White eventually won on time.
 

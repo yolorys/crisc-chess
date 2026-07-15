@@ -17,7 +17,6 @@
 # Private
 PROJECT_CONTEXT.md
 TODO.md
-crisc_repo_cover.png
 
 # ALLOW: Final lightweight datasets (safe to publish)
 !/data_sample/
