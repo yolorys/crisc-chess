@@ -1,4 +1,4 @@
-# CRISC: Data Analysis Pipeline for a Time-Scramble Tactic in Online Speed Chess
+# CRISC: Analyzing a Time-Scramble Tactic in Online Speed Chess
 
 **[Read the project write-up on my portfolio](https://yelarys.dev/blog/crisc-analysis-pipeline)**
 
@@ -6,9 +6,9 @@
 
 ## Abstract
 
-This project is a data pipeline that processes **45+ GB of raw Lichess game data** to isolate and analyze a specific time-scramble tactic in online speed chess: the **CRISC** - Contiguous Random Inferior Sacrificial Check, formerly called RISCK - Random Inferior Sacrificial Check to King.
+This project is a data pipeline that processes **45+ GB of raw Lichess game data** to isolate and analyze a specific time-scramble tactic in online speed chess: **CRISC** - Contiguous Random Inferior Sacrificial Check, formerly RISCK - Random Inferior Sacrificial Check to King.
 
-A CRISC is defined as an intentional, objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under extreme time pressure (≤ 5 seconds). Despite being a mathematically losing move (evaluation drop ≥ 400 centipawns), this analysis demonstrates that executing a CRISC yields a **76.17% win rate** across **N = 64,121** verified instances spanning three months of Lichess data (February–April 2026).
+A CRISC is an objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under extreme time pressure (e.g., ≤ 5 seconds). Despite being a mathematically losing move (e.g., evaluation drop ≥ 400 centipawns), this analysis demonstrates that executing a CRISC yields a **76.17% win rate** across **N = 64,121** verified instances spanning three months of Lichess data (February–April 2026).
 
 ### A visual example of CRISC from my dataset:
 ![An example of CRISC from my dataset](./visuals/crisc_repo_cover.png)
@@ -17,35 +17,53 @@ In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguo
 
 ### Initial findings from Iteration 1
 
-| Metric | CRISC Group | Control Group |
+| Metric | CRISC Group | Baseline Group |
 |---|:---:|:---:|
 | **Win Rate** | 76.17% | 82.52% |
 | **Reaction Time (R_O)** | 1.24s | 1.28s |
 | **Sample Size (N)** | 64,121 | 64,500 |
 
 ### Visual Data
-![Win Rate Comparison](./visuals/fig1_winrate.png)
-![Reaction Time Comparison](./visuals/fig2_reaction.png)
 
 > Despite sacrificing material worth ≥ 400 centipawns, CRISC executors retain a 76% win rate — only ~6 percentage points below players who deliver *mathematically sound* checks under identical time pressure.
 
+### Key Terminology
+
+To maintain strict consistency across both the CRISC and Baseline observational datasets:
+- **Player (`player`)**: The side (`'White'` or `'Black'`) executing the move at ply $n$. In the CRISC dataset, this is the player delivering the contiguous sacrificial check. In the Baseline dataset, this is the player making a standard move under identical time-scramble conditions.
+- **Opponent (`opponent`)**: The receiving side facing the move at ply $n$, under target time pressure ($T_O \le 5\text{s}$). Their reaction time ($R_O$) is tracked on the subsequent ply ($n+1$).
+- **Time Scramble Brackets**: To evaluate both mutual scrambles and clock asymmetries (rather than assuming one-sided time pressure), positions are cross-stratified across 4 clock differential brackets comparing the Opponent clock ($T_O \le 5\text{s}$) against the Player clock ($\le 5\text{s}$, $5-10\text{s}$, $10-15\text{s}$, and $15-20\text{s}$).
+
 ---
 
-## Methodology: Two-Step Filter
+## Methodology: Four-Step Filter & Statistical Analysis
 
-The pipeline uses a two-step filtering approach to isolate true CRISCs from ~270 million games:
+The pipeline uses a four-step filtering and statistical analysis approach to isolate true CRISCs from ~270 million games, control for confounding variables, and analyze win rates and reaction times:
 
 ### Step 1 — SQL Broad Filter (DuckDB + `aixchess` Extension)
-Scans Parquet files to extract all candidate checks meeting:
-- **Opponent Time Pressure:** T_O ≤ 5 seconds
-- **Objective Blunder:** ΔE ≤ -400 centipawns
-- **Forcing Move:** Delivers check
+Scans raw Parquet files to extract candidate positions for both CRISC and Baseline groups meeting strict integrity constraints:
+- **Opponent Time Pressure:** Opponent clock $T_O \le 5\text{s}$, Player clock $\le 20\text{s}$
+- **Objective Blunder (CRISC):** Evaluation drop $\Delta E \le -400$ centipawns delivering check
+- **Pre-Move Balance Control:** Pre-move evaluation between $-150$ and $+150$ centipawns (eliminates won/lost positions)
+- **Fairness Gap Constraint:** Opponent rating difference $| \text{Rating}_{\text{White}} - \text{Rating}_{\text{Black}} | \le 200$ points
+- **Statistical Independence:** `QUALIFY ROW_NUMBER() OVER (PARTITION BY lichess_id ORDER BY ply ASC) = 1` (limits to 1 event per game)
 
 ### Step 2 — Python Geometric Filter (`python-chess`)
-Rebuilds each board position and verifies:
-- **Major Piece:** The checking piece is a Knight, Bishop, Rook, or Queen
-- **Geometric Adjacency:** The piece is placed directly adjacent to the opponent's king (`chess.square_distance ≤ 1`)
-- **Legally Capturable:** The sacrifice is completely undefended
+Rebuilds board positions using `python-chess` to isolate True CRISCs:
+- **Major Piece:** Checking piece is a Knight, Bishop, Rook, or Queen (non-pawn)
+- **Geometric Adjacency:** Checking piece is placed directly adjacent to the opponent's king (`chess.square_distance ≤ 1`)
+- **Legally Capturable:** The sacrifice is completely undefended and legally capturable by the opponent
+
+### Step 3 — Win Rate Analysis & Elo Cross-Stratification (`winrate.py`)
+Processes True CRISCs and Baseline moves across 4 Elo Tiers (`<1000`, `1000-1500`, `1500-2000`, `>2000`) and 4 Time Scramble Brackets:
+- Computes win rates for CRISC and Baseline groups per stratum
+- Computes the 2D **Win Rate Lift Matrix** ($\Delta W = W_{\text{CRISC}} - W_{\text{Baseline}}$)
+
+### Step 4 — Opponent Reaction Time Cross-Stratification (`opponent_reaction.py`)
+Joins filtered datasets against raw clock arrays in DuckDB to measure opponent reaction time ($R_O$):
+- Filters out pre-moves ($R_O = 0$) and server underflow artifacts ($R_O < 0$)
+- Cross-stratifies $R_O$ across Elo Tiers $\times$ Time Scramble Brackets for both CRISC and Baseline groups
+- Computes the 2D **Reaction Time Difference Matrix** ($\Delta R_O = R_{O,\text{CRISC}} - R_{O,\text{Baseline}}$)
 
 ---
 
@@ -58,7 +76,6 @@ Rebuilds each board position and verifies:
 | **Python 3** | Orchestration, geometric filtering, statistical analysis |
 | **`python-chess`** | Board reconstruction and legal move validation |
 | **Pandas** | DataFrame operations and CSV aggregation |
-| **Matplotlib / Seaborn** | Data visualization |
 | **Nix** | Reproducible HPC environment (see `shell.nix`) |
 | **Bash** | Data download automation |
 
@@ -70,33 +87,23 @@ Rebuilds each board position and verifies:
 crisc-chess/
 ├── data/                          # Raw Parquet files (not tracked — 45+ GB)
 │
-├── crisc_sql_filter/              # CRISC group SQL queries
-│   └── crisc_sql_filter_YYYY-MM.sql
-├── control_filter/                # Control group SQL queries
-│   └── control_filter_YYYY-MM.sql
+├── crisc_sql_filter/              # CRISC group SQL queries (auto-generated)
+│   └── crisc_sql_filter_{CRISC_PATH_ID}.sql
+├── baseline_filter/               # Baseline group SQL queries
+│   └── baseline_filter_YYYY-MM.sql
 │
 ├── candidate_criscs/              # Step 1 output — intermediate CSVs (not tracked)
-│   └── candidate_criscs_YYYY-MM.csv
+│   └── candidate_criscs_{CRISC_PATH_ID}.csv
 ├── true_criscs/                   # Step 2 output — verified CRISC datasets
-│   └── true_criscs_YYYY-MM.csv
-├── control_checks/                # Control group datasets
-│   └── control_checks_YYYY-MM.csv
-├── results/                       # Final aggregated statistics
-│   ├── sensitivity_analysis_results.csv
-│   ├── master_scaling_results_T5_E400.csv
-│   └── control_group_results_T5.csv
-├── visuals/                       # Data visuals
-│   ├── fig1_winrate.png
-│   └── fig2_reaction.png
+│   └── true_criscs_{CRISC_PATH_ID}.csv
+├── baseline_moves/                # Baseline group datasets
+│   └── baseline_moves_YYYY-MM.csv
+├── visuals/                       # Data visuals (e.g. crisc_repo_cover.png)
 │
-├── sensitivity_analysis.py        # Threshold permutation orchestrator
-├── results_scaler_T5_E400.py      # Multi-month scaling pipeline
+├── run_pipeline.py                # Unified pipeline orchestrator (argparse CLI)
 ├── crisc_geometric_filter.py      # Geometric adjacency filter (python-chess)
-├── crisc_winrate.py               # Win rate calculator
-├── crisc_opponent_reaction.py     # Opponent reaction time (R_O) calculator
-├── control_opponent_reaction.py   # Control group extraction & reaction time
-├── control_winrate.py             # Control group win rate calculator
-├── generate_visuals.py            # Matplotlib/Seaborn chart generation
+├── winrate.py                     # CRISC & baseline win rate analysis with Elo stratification and lift matrix
+├── opponent_reaction.py           # CRISC & baseline opponent reaction time (R_O) calculator
 ├── download_data.sh               # Automated Parquet download script
 ├── shell.nix                      # Reproducible Nix environment
 ├── requirements.txt               # A list of external libraries
@@ -127,14 +134,9 @@ This path allows you to run a quick version of the pipeline using a 10,000-row t
    ```
 3. **Download DuckDB Binary**:
    Download the DuckDB CLI executable (v1.5.3 or compatible) from the official website (https://duckdb.org/install/?platform=windows&environment=cli) and place the `duckdb` binary directly in the root directory.
-4. **Configure for Path A**:
-   Modify the *DATA_DIR* variable in the orchestration scripts (`sensitivity_analysis.py` and `results_scaler_T5_E400.py`) to point to `./data_sample` instead of `./data`. In `results_scaler_T5_E400.py`, remove "2026-02" and "2026-03" from the array *months*.
-5. **Run Pipeline**:
-   Execute:
+4. **Run Pipeline** (single month, quick eval):
    ```bash
-   python sensitivity_analysis.py
-   python results_scaler_T5_E400.py
-   python generate_visuals.py
+   python run_pipeline.py --months 2026-04 --perm T5_E400 --data ./data_sample
    ```
 
 ### Path B: Full Scientific Reproduction (45GB+)
@@ -151,11 +153,9 @@ This path performs the full analysis on 270 million games.
    This downloads the `low_compression` Parquet files from [thomasd1/aix-lichess-database](https://huggingface.co/datasets/thomasd1/aix-lichess-database) on Hugging Face into the `./data/` directory.
 3. **Download DuckDB Binary**:
    Download the DuckDB CLI executable (v1.5.3 or compatible) and place the `duckdb` binary directly in the root directory.
-4. **Run the Pipeline**:
+4. **Run the Pipeline** (full 3-month analysis):
    ```bash
-   python sensitivity_analysis.py
-   python results_scaler_T5_E400.py
-   python generate_visuals.py
+   python run_pipeline.py --months 2026-02 2026-03 2026-04 --perm T5_E400 --data ./data
    ```
 
 ---

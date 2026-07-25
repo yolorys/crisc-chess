@@ -3,15 +3,15 @@ import chess
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: python crisc_geometric_filter.py <MONTH>")
+    print("Usage: python crisc_geometric_filter.py <CRISC_PATH_ID>")
     sys.exit(1)
 
-month = sys.argv[1]
+crisc_path_id = sys.argv[1]
 
 print("Starting Step 2: Geometric CRISC Filter...")
 
-# 1. Load the Step 1 (DuckDB) Data
-df = pd.read_csv(f'./candidate_criscs/candidate_criscs_{month}.csv')
+# 1. Load the Step 1 Candidate Data
+df = pd.read_csv(f'./candidate_criscs/candidate_criscs_{crisc_path_id}.csv')
 total_candidates = len(df)
 print(f"Loaded {total_candidates} candidate CRISCs. Processing...")
 
@@ -37,12 +37,12 @@ for index, row in df.iterrows():
             
         # --- THE GEOMETRIC FILTER ---
         last_move = board.peek()
-        attacker_sq = last_move.to_square
+        checking_sq = last_move.to_square
         king_sq = board.king(board.turn)
         
-        is_adjacent = chess.square_distance(king_sq, attacker_sq) <= 1
-        is_capturable = any(legal_move.to_square == attacker_sq for legal_move in board.legal_moves)
-        piece_type = board.piece_at(attacker_sq).piece_type
+        is_adjacent = chess.square_distance(king_sq, checking_sq) <= 1
+        is_capturable = any(legal_move.to_square == checking_sq for legal_move in board.legal_moves)
+        piece_type = board.piece_at(checking_sq).piece_type
         is_major_piece = piece_type != chess.PAWN
         
         if is_adjacent and is_capturable and is_major_piece:
@@ -52,14 +52,16 @@ for index, row in df.iterrows():
         error_count += 1
         continue
 
-# 3. Save the final refined dataset
+# 3. Save the final refined dataset -> true_criscs_...
 final_df = pd.DataFrame(true_criscs)
 if not final_df.empty:
     final_df = final_df.drop(columns=['move_list'])
-final_df.to_csv(f'./true_criscs/true_criscs_{month}.csv', index=False)
+else:
+    final_df = pd.DataFrame(columns=[c for c in df.columns if c != 'move_list'])
+final_df.to_csv(f'./true_criscs/true_criscs_{crisc_path_id}.csv', index=False)
 
 print(f"\nStep 2 (Geometric CRISC Filter) Complete!")
 print(f"Found {len(true_criscs)} True CRISCs out of {total_candidates} total candidates.")
 if error_count > 0:
     print(f"Note: {error_count} games were skipped due to PGN/UCI parsing errors.")
-print(f"Saved to './true_criscs/true_criscs_{month}.csv'.")
+print(f"Saved to './true_criscs/true_criscs_{crisc_path_id}.csv'.")

@@ -21,11 +21,11 @@ TODO.md
 # ALLOW: Final lightweight datasets (safe to publish)
 !/data_sample/
 !/data_sample/**
-!/results/
-!/results/**
 !/true_criscs/
 !/true_criscs/**
-!/control_checks/
-!/control_checks/**
+!/baseline_moves/
+!/baseline_moves/**
 !/crisc_sql_filter/
 !/crisc_sql_filter/**
+!/baseline_filter/
+!/baseline_filter/**
