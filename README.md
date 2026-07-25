@@ -6,7 +6,7 @@
 
 ## Abstract
 
-This project is a data pipeline that processes **45+ GB of raw Lichess game data** (~270 million moves) to isolate and analyze a specific time-scramble tactic in online speed chess: **CRISC** (Contiguous Random Inferior Sacrificial Check, formerly RISCK).
+This project is a data pipeline that processes **41 GB of raw Lichess game data** (~270 million moves) to isolate and analyze a specific time-scramble tactic in online speed chess: **CRISC** (Contiguous Random Inferior Sacrificial Check, formerly RISCK).
 
 A CRISC is an objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under severe time pressure ($T_O \le 5\text{s}$). Controlling for pre-move position balance ($-150 \le \text{eval} \le +150\text{cp}$) and rating gaps ($|\Delta\text{elo}| \le 200$), this analysis proves that executing a CRISC yields a **+8% to +10% statistically significant win rate lift** ($p < 0.001$) across **N = 10,813** verified instances spanning three months of Lichess data (February–April 2026).
 
@@ -81,7 +81,7 @@ Joins filtered datasets against raw clock arrays in DuckDB across all specified 
 
 | Tool | Role |
 |---|---|
-| **DuckDB** (v1.5.3 CLI) | High-performance SQL engine for scanning 15GB Parquet files |
+| **DuckDB** (v1.5.3 CLI) | High-performance SQL engine for scanning 14GB Parquet files |
 | **`aixchess`** | DuckDB community extension for decoding Lichess binary move data |
 | **Python 3** | Orchestration, geometric filtering, statistical analysis |
 | **`python-chess`** | Board reconstruction and legal move validation |
@@ -95,7 +95,7 @@ Joins filtered datasets against raw clock arrays in DuckDB across all specified 
 
 ```
 crisc-chess/
-├── data/                          # Raw Parquet files (not tracked — 45+ GB)
+├── data/                          # Raw Parquet files (not tracked — 41 GB)
 ├── data_sample/                   # Curated sample Parquet dataset for instant demonstration
 │
 ├── crisc_sql_filter/              # CRISC group SQL queries (auto-generated)
@@ -126,7 +126,7 @@ crisc-chess/
 ## Reproduction
 
 ### Path A: Quick Evaluation (Recommended)
-This path runs the complete 4-step pipeline in ~2 seconds using the curated `data_sample/` dataset without downloading the 45+ GB data:
+This path runs the complete 4-step pipeline in ~2 seconds using the curated `data_sample/` dataset (9.5 MB) without downloading the 41 GB raw dataset:
 
 1. **Create and activate a virtual environment**:
    ```bash
@@ -150,7 +150,7 @@ This path runs the complete 4-step pipeline in ~2 seconds using the curated `dat
    python run_pipeline.py --months 2026-04 --perm T5_E400 --data ./data_sample
    ```
 
-### Path B: Full Scientific Reproduction (45GB+)
+### Path B: Full Scientific Reproduction (41 GB)
 This path performs the full analysis on 270 million games.
 
 1. **Enter the Nix Environment**:
