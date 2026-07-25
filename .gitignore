@@ -8,11 +8,15 @@
 # Candidate CRISCs (~100MB intermediate CSVs)
 /candidate_criscs/
 
-# Environment & OS
+# Environment, Python & OS
 .env
 .DS_Store
 .vscode/
 .venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Private
 PROJECT_CONTEXT.md
