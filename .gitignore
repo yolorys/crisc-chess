@@ -21,6 +21,7 @@ __pycache__/
 # Private
 PROJECT_CONTEXT.md
 PROJECT_LOG.md
+.agents
 
 # ALLOW: Final lightweight datasets (safe to publish)
 !/data_sample/
