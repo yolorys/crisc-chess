@@ -183,4 +183,4 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Author
 
-**Yelarys Seidin** — Summer Research Project under Dr. Justin Schroeder at Dakota State University.
+Yelarys Seidin
