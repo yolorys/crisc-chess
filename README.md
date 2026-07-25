@@ -15,17 +15,26 @@ A CRISC is an objectively inferior piece sacrifice delivered directly adjacent t
 
 In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguous to the opponent's King, which dropped the engine eval by 5.8. White eventually won on time.
 
-### Initial findings from Iteration 1
+### 3-Month Empirical Findings (Feb–Apr 2026, N = 10,813 CRISCs vs N = 64,500 Baseline)
 
-| Metric | CRISC Group | Baseline Group |
-|---|:---:|:---:|
-| **Win Rate** | 76.17% | 82.52% |
-| **Reaction Time (R_O)** | 1.24s | 1.28s |
-| **Sample Size (N)** | 64,121 | 64,500 |
+#### 1. Win Rate Lift Matrix ($\Delta W = W_{\text{CRISC}} - W_{\text{Baseline}}$) & Statistical Significance
+*Legend: `***` ($p < 0.001$), `**` ($p < 0.01$), `*` ($p < 0.05$), `ns` (not significant)*
 
-### Visual Data
+| Elo Tier | $\le 5\text{s}$ vs $\le 5\text{s}$ | $\le 5\text{s}$ vs $5\text{--}10\text{s}$ | $\le 5\text{s}$ vs $10\text{--}15\text{s}$ | $\le 5\text{s}$ vs $15\text{--}20\text{s}$ |
+|---|:---:|:---:|:---:|:---:|
+| **< 1000** | $+3.18\%^{\text{ns}}$ <br> `[-5.91%, +12.27%]` | $+5.50\%^{\text{ns}}$ <br> `[-1.88%, +12.89%]` | $+0.80\%^{\text{ns}}$ <br> `[-5.93%, +7.52%]` | $+2.36\%^{\text{ns}}$ <br> `[-0.98%, +5.71%]` |
+| **1000 – 1500** | **$+8.99\%^{***}$** <br> `[+5.32%, +12.65%]` | **$+7.07\%^{***}$** <br> `[+4.17%, +9.98%]` | $+2.63\%^{\text{ns}}$ <br> `[-0.16%, +5.43%]` | $+0.57\%^{\text{ns}}$ <br> `[-2.29%, +3.42%]` |
+| **1500 – 2000** | **$+9.73\%^{***}$** <br> `[+6.96%, +12.50%]` | **$+9.29\%^{***}$** <br> `[+6.83%, +11.75%]` | **$+4.90\%^{***}$** <br> `[+2.60%, +7.36%]` | $+1.35\%^{\text{ns}}$ <br> `[-1.26%, +3.97%]` |
+| **> 2000** | **$+8.41\%^{***}$** <br> `[+6.02%, +10.79%]` | **$+9.80\%^{***}$** <br> `[+7.08%, +12.51%]` | **$+6.01\%^{**}$** <br> `[+2.90%, +9.11%]` | $-0.72\%^{\text{ns}}$ <br> `[-5.16%, +3.71%]` |
 
-> Despite sacrificing material worth ≥ 400 centipawns, CRISC executors retain a 76% win rate — only ~6 percentage points below players who deliver *mathematically sound* checks under identical time pressure.
+#### 2. Pooled Opponent Reaction Time Difference Matrix ($\Delta R_O = R_{O,\text{CRISC}} - R_{O,\text{Baseline}}$)
+
+| Elo Tier | $\le 5\text{s}$ vs $\le 5\text{s}$ | $\le 5\text{s}$ vs $5\text{--}10\text{s}$ | $\le 5\text{s}$ vs $10\text{--}15\text{s}$ | $\le 5\text{s}$ vs $15\text{--}20\text{s}$ |
+|---|:---:|:---:|:---:|:---:|
+| **< 1000** | $-0.11\text{s}$ | $-0.13\text{s}$ | $-0.00\text{s}$ | $-0.01\text{s}$ |
+| **1000 – 1500** | **$-0.21\text{s}$** | **$-0.17\text{s}$** | **$-0.21\text{s}$** | **$-0.15\text{s}$** |
+| **1500 – 2000** | **$-0.18\text{s}$** | **$-0.18\text{s}$** | **$-0.17\text{s}$** | **$-0.15\text{s}$** |
+| **> 2000** | **$-0.09\text{s}$** | **$-0.12\text{s}$** | **$-0.15\text{s}$** | **$-0.10\text{s}$** |
 
 ### Key Terminology
 
@@ -54,15 +63,16 @@ Rebuilds board positions using `python-chess` to isolate True CRISCs:
 - **Geometric Adjacency:** Checking piece is placed directly adjacent to the opponent's king (`chess.square_distance ≤ 1`)
 - **Legally Capturable:** The sacrifice is completely undefended and legally capturable by the opponent
 
-### Step 3 — Win Rate Analysis & Elo Cross-Stratification (`winrate.py`)
+### Step 3 — Win Rate Analysis & Inferential Statistics (`winrate.py`)
 Processes True CRISCs and Baseline moves across 4 Elo Tiers (`<1000`, `1000-1500`, `1500-2000`, `>2000`) and 4 Time Scramble Brackets:
 - Computes win rates for CRISC and Baseline groups per stratum
 - Computes the 2D **Win Rate Lift Matrix** ($\Delta W = W_{\text{CRISC}} - W_{\text{Baseline}}$)
+- Computes two-proportion **Chi-Square ($\chi^2$) / Z-tests** ($p$-values) and **95% Confidence Intervals** for every cell
 
-### Step 4 — Opponent Reaction Time Cross-Stratification (`opponent_reaction.py`)
-Joins filtered datasets against raw clock arrays in DuckDB to measure opponent reaction time ($R_O$):
+### Step 4 — Pooled Opponent Reaction Time Analysis (`opponent_reaction.py`)
+Joins filtered datasets against raw clock arrays in DuckDB across all specified months to measure pooled opponent reaction time ($R_O$):
 - Filters out pre-moves ($R_O = 0$) and server underflow artifacts ($R_O < 0$)
-- Cross-stratifies $R_O$ across Elo Tiers $\times$ Time Scramble Brackets for both CRISC and Baseline groups
+- Cross-stratifies pooled $R_O$ across Elo Tiers $\times$ Time Scramble Brackets for both CRISC and Baseline groups
 - Computes the 2D **Reaction Time Difference Matrix** ($\Delta R_O = R_{O,\text{CRISC}} - R_{O,\text{Baseline}}$)
 
 ---
