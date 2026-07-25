@@ -16,7 +16,7 @@
 
 # Private
 PROJECT_CONTEXT.md
-TODO.md
+PROJECT_LOG.md
 
 # ALLOW: Final lightweight datasets (safe to publish)
 !/data_sample/
