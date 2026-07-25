@@ -1,15 +1,21 @@
+import argparse
 import duckdb
 import os
 import pandas as pd
 import sys
 
-if len(sys.argv) < 3:
-    print("Usage: python opponent_reaction.py <CRISC_PATH_ID> <BASELINE_PATH_ID> [data_dir]")
-    sys.exit(1)
+parser = argparse.ArgumentParser(description="CRISC & Baseline Opponent Reaction Time Analysis")
+parser.add_argument("--months", nargs="+", required=True, help="List of months (e.g. 2026-02 2026-03 2026-04)")
+parser.add_argument("--perm", default="T5_E400", help="Permutation ID (default: T5_E400)")
+parser.add_argument("--data", default="./data", help="Data directory containing Parquet files")
+args = parser.parse_args()
 
-crisc_path_id = sys.argv[1]    # e.g. "2026-04_T5_E400" or "2026-02~2026-04_T5_E400"
-baseline_path_id = sys.argv[2]  # e.g. "2026-04" (a single month — the parquet to join against)
-data_dir = sys.argv[3] if len(sys.argv) >= 4 else "./data"
+months = args.months
+perm = args.perm
+data_dir = args.data
+
+month_id = months[0] if len(months) == 1 else f"{months[0]}~{months[-1]}"
+crisc_path_id = f"{month_id}_{perm}"
 
 ELO_TIERS = [
     ('< 1000', 0, 999),
@@ -105,14 +111,28 @@ def print_ro_matrix(label, matrix, brackets):
             n, avg_ro = matrix[tier_name][b]
             print(f'{b:<20} {n:>8} {avg_ro:>11.2f}s')
 
-parquet_path = f"{data_dir}/aix_lichess_{baseline_path_id}_low.parquet"
-print(f"\nComputing Stratified Reaction Time (R_O) for [{baseline_path_id}]...")
-
 crisc_csv = f"./true_criscs/true_criscs_{crisc_path_id}.csv"
-baseline_csv = f"./baseline_moves/baseline_moves_{baseline_path_id}.csv"
 
-crisc_df = compute_ro_records(crisc_csv, parquet_path)
-baseline_df = compute_ro_records(baseline_csv, parquet_path)
+print(f"\nComputing Pooled Stratified Reaction Time (R_O) across months: {months}...")
+
+crisc_records_list = []
+baseline_records_list = []
+
+for m in months:
+    parquet_path = f"{data_dir}/aix_lichess_{m}_low.parquet"
+    baseline_csv = f"./baseline_moves/baseline_moves_{m}.csv"
+    
+    if os.path.exists(parquet_path):
+        c_rec = compute_ro_records(crisc_csv, parquet_path)
+        if not c_rec.empty:
+            crisc_records_list.append(c_rec)
+            
+        b_rec = compute_ro_records(baseline_csv, parquet_path)
+        if not b_rec.empty:
+            baseline_records_list.append(b_rec)
+
+crisc_df = pd.concat(crisc_records_list, ignore_index=True) if crisc_records_list else pd.DataFrame()
+baseline_df = pd.concat(baseline_records_list, ignore_index=True) if baseline_records_list else pd.DataFrame()
 
 # Derive brackets dynamically or fallback
 if not crisc_df.empty and 'time_scramble_bracket' in crisc_df.columns:

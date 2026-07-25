@@ -176,12 +176,11 @@ for perm in perms:
 
     # Step 3: Win rate & Elo stratification
     print(f"\n--- Step 3: Win Rate & Elo Analysis ---")
-    run([sys.executable, "winrate.py", master_crisc_path_id] + months)
+    run([sys.executable, "winrate.py", "--months"] + months + ["--perm", perm])
 
-    # Step 4: Reaction time — once per month
-    print(f"\n--- Step 4: Reaction Time (R_O) ---")
-    for month in months:
-        run([sys.executable, "opponent_reaction.py", master_crisc_path_id, month, data_dir])
+    # Step 4: Reaction time — pooled across all specified months
+    print(f"\n--- Step 4: Reaction Time (R_O) Analysis ---")
+    run([sys.executable, "opponent_reaction.py", "--months"] + months + ["--perm", perm, "--data", data_dir])
 
 print(f"\n{'='*60}")
 print("Pipeline complete!")
