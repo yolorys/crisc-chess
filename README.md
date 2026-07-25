@@ -96,6 +96,7 @@ Joins filtered datasets against raw clock arrays in DuckDB across all specified 
 ```
 crisc-chess/
 ├── data/                          # Raw Parquet files (not tracked — 45+ GB)
+├── data_sample/                   # Curated sample Parquet dataset for instant demonstration
 │
 ├── crisc_sql_filter/              # CRISC group SQL queries (auto-generated)
 │   └── crisc_sql_filter_{CRISC_PATH_ID}.sql
@@ -112,8 +113,8 @@ crisc-chess/
 │
 ├── run_pipeline.py                # Unified pipeline orchestrator (argparse CLI)
 ├── crisc_geometric_filter.py      # Geometric adjacency filter (python-chess)
-├── winrate.py                     # CRISC & baseline win rate analysis with Elo stratification and lift matrix
-├── opponent_reaction.py           # CRISC & baseline opponent reaction time (R_O) calculator
+├── winrate.py                     # Win rate analysis, Chi-Square p-values, and 95% CIs
+├── opponent_reaction.py           # Pooled multi-month opponent reaction time (R_O) calculator
 ├── download_data.sh               # Automated Parquet download script
 ├── shell.nix                      # Reproducible Nix environment
 ├── requirements.txt               # A list of external libraries
@@ -125,7 +126,7 @@ crisc-chess/
 ## Reproduction
 
 ### Path A: Quick Evaluation (Recommended)
-This path allows you to run a quick version of the pipeline using a 10,000-row toy dataset (from lichess_2026-04) without downloading the full 45GB data.
+This path runs the complete 4-step pipeline in ~2 seconds using the curated `data_sample/` dataset without downloading the 45+ GB data:
 
 1. **Create and activate a virtual environment**:
    ```bash
