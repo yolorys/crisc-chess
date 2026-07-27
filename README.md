@@ -6,7 +6,7 @@
 
 ## Abstract
 
-This project is a data pipeline that processes **41 GB of raw Lichess game data** (~270 million moves) to isolate and analyze a specific time-scramble tactic in online speed chess: **CRISC** (Contiguous Random Inferior Sacrificial Check, formerly RISCK).
+This project is a data pipeline that processes **41 GB of raw Lichess game data** (~270 million games) to isolate and analyze a specific time-scramble tactic in online speed chess: **CRISC** (Contiguous Random Inferior Sacrificial Check, formerly RISCK).
 
 A CRISC is an objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under severe time pressure ($T_O \le 5\text{s}$). Controlling for pre-move position balance ($-150 \le \text{eval} \le +150\text{cp}$) and rating gaps ($|\Delta\text{elo}| \le 200$), this analysis proves that executing a CRISC yields a **+8% to +10% statistically significant win rate lift** ($p < 0.001$) across **N = 10,813** verified instances spanning three months of Lichess data (February–April 2026).
 
