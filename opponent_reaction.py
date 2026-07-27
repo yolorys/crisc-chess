@@ -1,6 +1,8 @@
 import argparse
 import duckdb
+import math
 import os
+import numpy as np
 import pandas as pd
 import sys
 
@@ -94,22 +96,63 @@ def build_ro_matrix(df, brackets):
         for b in brackets:
             if not tier_df.empty:
                 b_df = tier_df[tier_df['time_scramble_bracket'] == b]
-                n = len(b_df)
-                avg_ro = b_df['reaction_time'].mean() if n > 0 else 0.0
+                times = b_df['reaction_time'].values if not b_df.empty else np.array([])
+                n = len(times)
+                avg_ro = float(np.mean(times)) if n > 0 else 0.0
             else:
+                times = np.array([])
                 n, avg_ro = 0, 0.0
-            matrix[tier_name][b] = (n, avg_ro if pd.notna(avg_ro) else 0.0)
+            matrix[tier_name][b] = {
+                'n': n,
+                'avg_ro': avg_ro if pd.notna(avg_ro) else 0.0,
+                'times': times
+            }
     return matrix
 
 def print_ro_matrix(label, matrix, brackets):
     for tier_name, _, _ in ELO_TIERS:
-        tier_total_n = sum(n for n, _ in matrix[tier_name].values())
+        tier_total_n = sum(data['n'] for data in matrix[tier_name].values())
         print(f'\n--- {label} R_O: {tier_name} Elo (Valid Games N = {tier_total_n}) ---')
         print(f'{"Bracket":<20} {"N":>8} {"Avg R_O (s)":>12}')
         print('-' * 42)
         for b in brackets:
-            n, avg_ro = matrix[tier_name][b]
+            n = matrix[tier_name][b]['n']
+            avg_ro = matrix[tier_name][b]['avg_ro']
             print(f'{b:<20} {n:>8} {avg_ro:>11.2f}s')
+
+def compute_welch_stats(x1, x2):
+    """
+    Computes Welch's t-test and 95% Confidence Interval for difference in means (mean1 - mean2).
+    x1: CRISC reaction times array
+    x2: Baseline reaction times array
+    """
+    n1, n2 = len(x1), len(x2)
+    if n1 < 2 or n2 < 2:
+        return 0.0, 0.0, 0.0, "ns"
+
+    m1, m2 = float(np.mean(x1)), float(np.mean(x2))
+    v1, v2 = float(np.var(x1, ddof=1)), float(np.var(x2, ddof=1))
+    
+    diff = m1 - m2
+    se = math.sqrt((v1 / n1) + (v2 / n2))
+    
+    if se == 0:
+        return diff, 0.0, 0.0, "ns"
+
+    ci_lower = diff - 1.96 * se
+    ci_upper = diff + 1.96 * se
+    
+    z = abs(diff) / se
+    if z >= 3.291:
+        sig = "***"
+    elif z >= 2.576:
+        sig = "**"
+    elif z >= 1.960:
+        sig = "*"
+    else:
+        sig = "ns"
+        
+    return diff, ci_lower, ci_upper, sig
 
 crisc_csv = f"./true_criscs/true_criscs_{crisc_path_id}.csv"
 
@@ -169,8 +212,21 @@ print('-' * (15 + col_width * len(brackets)))
 for tier_name, _, _ in ELO_TIERS:
     print(f'{tier_name:<15}', end='')
     for b in brackets:
-        crisc_ro = crisc_ro_matrix[tier_name][b][1]
-        baseline_ro = baseline_ro_matrix[tier_name][b][1]
+        crisc_ro = crisc_ro_matrix[tier_name][b]['avg_ro']
+        baseline_ro = baseline_ro_matrix[tier_name][b]['avg_ro']
         diff = crisc_ro - baseline_ro
         print(f'{diff:>+{col_width - 1}.2f}s', end='')
     print()
+
+print("\n========================================================================================================")
+print("REACTION TIME DIFFERENCE & STATISTICAL SIGNIFICANCE (Welch's t-Test & 95% CI)")
+print("Legend: *** (p < 0.001), ** (p < 0.01), * (p < 0.05), ns (not significant)")
+print("========================================================================================================")
+
+for tier_name, _, _ in ELO_TIERS:
+    print(f"\n--- {tier_name} Elo ---")
+    for b in brackets:
+        x1 = crisc_ro_matrix[tier_name][b]['times']
+        x2 = baseline_ro_matrix[tier_name][b]['times']
+        diff, ci_l, ci_u, sig = compute_welch_stats(x1, x2)
+        print(f"{b:<20}: {diff:>+6.2f}s{sig:<4} (95% CI: [{ci_l:>+6.2f}s, {ci_u:>+6.2f}s])")

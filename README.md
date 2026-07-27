@@ -27,14 +27,15 @@ In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguo
 | **1500 – 2000** | **+9.73%** (\*\*\*) <br>`[+6.96%, +12.50%]` | **+9.29%** (\*\*\*) <br>`[+6.83%, +11.75%]` | **+4.90%** (\*\*\*) <br>`[+2.60%, +7.36%]` | +1.35% (ns)<br>`[-1.26%, +3.97%]` |
 | **> 2000** | **+8.41%** (\*\*\*) <br>`[+6.02%, +10.79%]` | **+9.80%** (\*\*\*) <br>`[+7.08%, +12.51%]` | **+6.01%** (\*\*) <br>`[+2.90%, +9.11%]` | -0.72% (ns)<br>`[-5.16%, +3.71%]` |
 
-#### 2. Pooled Opponent Reaction Time Difference Matrix (ΔR_O = CRISC R_O − Baseline R_O)
+#### 2. Pooled Opponent Reaction Time Difference Matrix (ΔR_O = CRISC R_O − Baseline R_O) & Statistical Significance
+*Legend: `***` (p < 0.001), `**` (p < 0.01), `*` (p < 0.05), `ns` (not significant)*
 
 | Elo Tier | <= 5s vs <= 5s | <= 5s vs 5-10s | <= 5s vs 10-15s | <= 5s vs 15-20s |
 |---|:---:|:---:|:---:|:---:|
-| **< 1000** | -0.11s | -0.13s | -0.00s | -0.01s |
-| **1000 – 1500** | **-0.21s** | **-0.17s** | **-0.21s** | **-0.15s** |
-| **1500 – 2000** | **-0.18s** | **-0.18s** | **-0.17s** | **-0.15s** |
-| **> 2000** | **-0.09s** | **-0.12s** | **-0.15s** | **-0.10s** |
+| **< 1000** | -0.11s (ns)<br>`[-0.28s, +0.06s]` | -0.13s (ns)<br>`[-0.29s, +0.03s]` | -0.00s (ns)<br>`[-0.24s, +0.24s]` | -0.01s (ns)<br>`[-0.24s, +0.22s]` |
+| **1000 – 1500** | **-0.21s** (\*\*\*) <br>`[-0.26s, -0.15s]` | **-0.17s** (\*\*\*) <br>`[-0.25s, -0.10s]` | **-0.21s** (\*\*\*) <br>`[-0.30s, -0.13s]` | -0.15s (\*) <br>`[-0.28s, -0.02s]` |
+| **1500 – 2000** | **-0.18s** (\*\*\*) <br>`[-0.22s, -0.15s]` | **-0.18s** (\*\*\*) <br>`[-0.23s, -0.14s]` | **-0.17s** (\*\*\*) <br>`[-0.24s, -0.11s]` | **-0.15s** (\*\*\*) <br>`[-0.24s, -0.06s]` |
+| **> 2000** | **-0.09s** (\*\*\*) <br>`[-0.12s, -0.06s]` | **-0.12s** (\*\*\*) <br>`[-0.15s, -0.09s]` | **-0.15s** (\*\*\*) <br>`[-0.21s, -0.10s]` | -0.10s (\*) <br>`[-0.18s, -0.01s]` |
 
 ### Key Terminology
 
@@ -74,6 +75,7 @@ Joins filtered datasets against raw clock arrays in DuckDB across all specified 
 - Filters out pre-moves ($R_O = 0$) and server underflow artifacts ($R_O < 0$)
 - Cross-stratifies pooled $R_O$ across Elo Tiers $\times$ Time Scramble Brackets for both CRISC and Baseline groups
 - Computes the 2D **Reaction Time Difference Matrix** ($\Delta R_O = R_{O,\text{CRISC}} - R_{O,\text{Baseline}}$)
+- Computes **Welch's t-tests** ($p$-values) and **95% Confidence Intervals** for every cell
 
 ---
 
