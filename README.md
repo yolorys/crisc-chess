@@ -64,15 +64,22 @@ However, White played Rxg7+, an objectively inferior, sacrificial check contiguo
 The pipeline uses a four-step filtering and statistical analysis approach to isolate true CRISCs from ~270 million games, control for confounding variables, and analyze win rates and reaction times:
 
 ### Step 1 — SQL Broad Filter (DuckDB + `aixchess` Extension)
-Scans raw Parquet files to extract candidate positions for both CRISC and Baseline groups meeting strict integrity constraints:
+Scans raw Parquet files to extract candidate positions for **both the CRISC and Baseline groups** under matching integrity constraints:
+
+**Shared constraints (both groups):**
 - **Opponent Time Pressure:** Opponent clock $T_O \le 5\text{s}$, Player clock $\le 20\text{s}$
-- **Objective Blunder (CRISC):** Evaluation drop $\Delta E \le -400$ centipawns delivering check
 - **Pre-Move Balance Control:** Pre-move evaluation between $-150$ and $+150$ centipawns (eliminates won/lost positions)
 - **Fairness Gap Constraint:** Opponent rating difference |Rating_White - Rating_Black| <= 200 points
 - **Statistical Independence:** `QUALIFY ROW_NUMBER() OVER (PARTITION BY lichess_id ORDER BY ply ASC) = 1` (limits to 1 event per game)
 
-### Step 2 — Python Geometric Filter (`python-chess`)
-Rebuilds board positions using `python-chess` to isolate True CRISCs:
+**CRISC-only constraint:**
+- **Objective Blunder:** Evaluation drop $\Delta E \le -400$ centipawns delivering check
+
+**Baseline group construction:**
+The Baseline group is extracted from the same Parquet data using the same shared constraints above, but with **no check or blunder requirement**. It captures standard moves played under identical time-scramble conditions from balanced positions. To prevent the baseline from vastly outnumbering CRISCs, 21,500 moves are randomly sampled per month (`ORDER BY random() LIMIT 21500`), yielding N = 64,500 baseline moves across 3 months.
+
+### Step 2 — Python Geometric Filter (`python-chess`) — CRISC group only
+Rebuilds board positions using `python-chess` to isolate True CRISCs from the CRISC candidates. **This step does not apply to the Baseline group.**
 - **Major Piece:** Checking piece is a Knight, Bishop, Rook, or Queen (non-pawn)
 - **Geometric Adjacency:** Checking piece is placed directly adjacent to the opponent's king (`chess.square_distance ≤ 1`)
 - **Legally Capturable:** The sacrifice is completely undefended and legally capturable by the opponent
