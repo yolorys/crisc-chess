@@ -10,10 +10,30 @@ This project is a data pipeline that processes **41 GB of raw Lichess game data*
 
 A CRISC is an objectively inferior piece sacrifice delivered directly adjacent to the opponent's king while the opponent is under severe time pressure ($T_O \le 5\text{s}$). Controlling for pre-move position balance ($-150 \le \text{eval} \le +150\text{cp}$) and rating gaps ($|\Delta\text{elo}| \le 200$), this analysis proves that executing a CRISC yields a **+8% to +10% statistically significant win rate lift** ($p < 0.001$) across **N = 10,813** verified instances spanning three months of Lichess data (February–April 2026).
 
-### A visual example of CRISC from my dataset:
-![An example of CRISC from my dataset](./visuals/crisc_repo_cover.png)
+---
 
-In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguous to the opponent's King, which dropped the engine eval by 5.8. White eventually won on time.
+### Key Terms
+
+To maintain strict consistency across both the CRISC and Baseline observational datasets:
+- **Player (`player`)**: The side (`'White'` or `'Black'`) executing the move at ply $n$. In the CRISC dataset, this is the player delivering the contiguous sacrificial check. In the Baseline dataset, this is the player making a standard move under identical time-scramble conditions.
+- **Opponent (`opponent`)**: The receiving side facing the move at ply $n$, under target time pressure ($T_O \le 5\text{s}$). Their reaction time ($R_O$) is tracked on the subsequent ply ($n+1$).
+- **Time Scramble Brackets**: To evaluate both mutual scrambles and clock asymmetries (rather than assuming one-sided time pressure), positions are cross-stratified across 4 clock differential brackets comparing the Opponent clock ($T_O \le 5\text{s}$) against the Player clock ($\le 5\text{s}$, $5-10\text{s}$, $10-15\text{s}$, and $15-20\text{s}$).
+
+---
+
+### A visual example of CRISC from my dataset:
+#### Game metadata: L9MILKce,77,1-0,White,1978,<=5s vs <=5s
+#### Pre-CRISC position (one ply before the Player delivers a CRISC)
+![Pre-CRISC position](./visuals/example_pre-crisc.png)
+
+In this position, engine eval was roughly equal and both sides had under 5s on their clock. The best move for White was Rxb6.
+
+#### Post-CRISC position (one ply after the Player delivers a CRISC)
+![Post-CRISC position](./visuals/example_post-crisc.png)
+
+However, White played Rxg7+, an objectively inferior, sacrificial check contiguous to the Opponent's king, which dropped the engine eval by 400+ centipawns. Black took 1.2s to capture the rook. White eventually won on time.
+
+---
 
 ### 3-Month Empirical Findings (Feb–Apr 2026, N = 10,813 CRISCs vs N = 64,500 Baseline)
 
@@ -36,13 +56,6 @@ In a time scramble (≤ 5 seconds), White sacks their Rook with a check contiguo
 | **1000 – 1500** | **-0.21s** (\*\*\*) <br>`[-0.26s, -0.15s]` | **-0.17s** (\*\*\*) <br>`[-0.25s, -0.10s]` | **-0.21s** (\*\*\*) <br>`[-0.30s, -0.13s]` | -0.15s (\*) <br>`[-0.28s, -0.02s]` |
 | **1500 – 2000** | **-0.18s** (\*\*\*) <br>`[-0.22s, -0.15s]` | **-0.18s** (\*\*\*) <br>`[-0.23s, -0.14s]` | **-0.17s** (\*\*\*) <br>`[-0.24s, -0.11s]` | **-0.15s** (\*\*\*) <br>`[-0.24s, -0.06s]` |
 | **> 2000** | **-0.09s** (\*\*\*) <br>`[-0.12s, -0.06s]` | **-0.12s** (\*\*\*) <br>`[-0.15s, -0.09s]` | **-0.15s** (\*\*\*) <br>`[-0.21s, -0.10s]` | -0.10s (\*) <br>`[-0.18s, -0.01s]` |
-
-### Key Terminology
-
-To maintain strict consistency across both the CRISC and Baseline observational datasets:
-- **Player (`player`)**: The side (`'White'` or `'Black'`) executing the move at ply $n$. In the CRISC dataset, this is the player delivering the contiguous sacrificial check. In the Baseline dataset, this is the player making a standard move under identical time-scramble conditions.
-- **Opponent (`opponent`)**: The receiving side facing the move at ply $n$, under target time pressure ($T_O \le 5\text{s}$). Their reaction time ($R_O$) is tracked on the subsequent ply ($n+1$).
-- **Time Scramble Brackets**: To evaluate both mutual scrambles and clock asymmetries (rather than assuming one-sided time pressure), positions are cross-stratified across 4 clock differential brackets comparing the Opponent clock ($T_O \le 5\text{s}$) against the Player clock ($\le 5\text{s}$, $5-10\text{s}$, $10-15\text{s}$, and $15-20\text{s}$).
 
 ---
 
