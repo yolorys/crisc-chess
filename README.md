@@ -68,7 +68,7 @@ Scans raw Parquet files to extract candidate positions for both CRISC and Baseli
 - **Opponent Time Pressure:** Opponent clock $T_O \le 5\text{s}$, Player clock $\le 20\text{s}$
 - **Objective Blunder (CRISC):** Evaluation drop $\Delta E \le -400$ centipawns delivering check
 - **Pre-Move Balance Control:** Pre-move evaluation between $-150$ and $+150$ centipawns (eliminates won/lost positions)
-- **Fairness Gap Constraint:** Opponent rating difference $| \text{Rating}_{\text{White}} - \text{Rating}_{\text{Black}} | \le 200$ points
+- **Fairness Gap Constraint:** Opponent rating difference |Rating_White - Rating_Black| <= 200 points
 - **Statistical Independence:** `QUALIFY ROW_NUMBER() OVER (PARTITION BY lichess_id ORDER BY ply ASC) = 1` (limits to 1 event per game)
 
 ### Step 2 — Python Geometric Filter (`python-chess`)
