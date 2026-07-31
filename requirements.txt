@@ -1,5 +1,3 @@
 duckdb
 pandas
-matplotlib
-seaborn
 python-chess
