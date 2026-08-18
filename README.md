@@ -38,6 +38,8 @@ However, White played Rxg7+, an objectively inferior, sacrificial check contiguo
 ### 3-Month Empirical Findings (Feb–Apr 2026, N = 10,813 CRISCs vs N = 64,500 Baseline)
 
 #### 1. Win Rate Lift Matrix (ΔW = CRISC Win Rate − Baseline Win Rate) & Statistical Significance
+![Figure 1: Win Rate Analysis](./visuals/fig1_winrate_analysis.png)
+
 *Legend: `***` (p < 0.001), `**` (p < 0.01), `*` (p < 0.05), `ns` (not significant)*
 
 | Elo Tier | <= 5s vs <= 5s | <= 5s vs 5-10s | <= 5s vs 10-15s | <= 5s vs 15-20s |
@@ -48,6 +50,8 @@ However, White played Rxg7+, an objectively inferior, sacrificial check contiguo
 | **> 2000** | **+8.41%** (\*\*\*) <br>`[+6.02%, +10.79%]` | **+9.80%** (\*\*\*) <br>`[+7.08%, +12.51%]` | **+6.01%** (\*\*) <br>`[+2.90%, +9.11%]` | -0.72% (ns)<br>`[-5.16%, +3.71%]` |
 
 #### 2. Pooled Opponent Reaction Time Difference Matrix (ΔR_O = CRISC R_O − Baseline R_O) & Statistical Significance
+![Figure 2: Opponent Reaction Time Analysis](./visuals/fig2_reaction_time_analysis.png)
+
 *Legend: `***` (p < 0.001), `**` (p < 0.01), `*` (p < 0.05), `ns` (not significant)*
 
 | Elo Tier | <= 5s vs <= 5s | <= 5s vs 5-10s | <= 5s vs 10-15s | <= 5s vs 15-20s |
@@ -56,6 +60,14 @@ However, White played Rxg7+, an objectively inferior, sacrificial check contiguo
 | **1000 – 1500** | **-0.21s** (\*\*\*) <br>`[-0.26s, -0.15s]` | **-0.17s** (\*\*\*) <br>`[-0.25s, -0.10s]` | **-0.21s** (\*\*\*) <br>`[-0.30s, -0.13s]` | -0.15s (\*) <br>`[-0.28s, -0.02s]` |
 | **1500 – 2000** | **-0.18s** (\*\*\*) <br>`[-0.22s, -0.15s]` | **-0.18s** (\*\*\*) <br>`[-0.23s, -0.14s]` | **-0.17s** (\*\*\*) <br>`[-0.24s, -0.11s]` | **-0.15s** (\*\*\*) <br>`[-0.24s, -0.06s]` |
 | **> 2000** | **-0.09s** (\*\*\*) <br>`[-0.12s, -0.06s]` | **-0.12s** (\*\*\*) <br>`[-0.15s, -0.09s]` | **-0.15s** (\*\*\*) <br>`[-0.21s, -0.10s]` | -0.10s (\*) <br>`[-0.18s, -0.01s]` |
+
+#### 3. Some other visuals I found interesting:
+![Figure 3: Research Summary Dashboard](./visuals/fig3_research_summary_dashboard.png)
+
+- **Win Rate Lift in Equal Scrambles**: Consistent ~8% to 10% ΔW across rating tiers above `1000` Elo.
+- **Opponent Reaction Time Delta (ΔR_O)**: Above `1000` Elo, opponent reaction time difference (ΔR_O) shrinks from -0.21s (`1000–1500` Elo) down to -0.09s (`>2000` Elo).
+- **Sample Volume**: In both CRISC and Baseline groups, the `< 1000` elo bracket has really small sample size, which is one of the primary reasons for statistically insignifcant results in that bracket.
+- **Decreasing ΔW**: Above `1000` Elo, ΔW decreases as Player clock time ($T_P$) increases relative to Opponent clock time ($T_O$).
 
 ---
 
